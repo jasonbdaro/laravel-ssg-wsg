@@ -27,7 +27,6 @@ class Ssgwsg
     const GET_COURSE_BROCHURES = '/courses/brochures';
     const GET_COURSE_ENQUIRIES = '/courses/enquiries';
 
-    protected $client;
     protected $apiUrl;
     protected $method;
     protected $options;
@@ -37,7 +36,7 @@ class Ssgwsg
 
     public function __call($name, $arguments)
     {
-        $prefix = config('config.livemode') ? '' : 'TEST_';
+        $prefix = $this->isLive() ? '' : 'TEST_';
         if (Str::startsWith($name, $this->prefix)) {
             $this->setOpenAttributes($name, $prefix, $arguments);
         } else {
@@ -55,14 +54,38 @@ class Ssgwsg
     protected function request()
     {
         $client = new Client();
+        if ($this->isLive()) {
+            if ('open' === $this->type) {
+                $client = new Client(['headers' => ['Authorization' => "Bearer {$this->getAccessToken()}"]]);
+            }
+            if ('certificate' === $this->type) {
+                $passphrase = config('ssgwsg.cert_password');
+                $client = new Client([
+                    'cert' => [config('ssgwsg.cert_public_path'), $passphrase],
+                    'ssl_key' => [config('ssgwsg.cert_secret_path'), $passphrase],
+                ]);
+            }
+        }
         try {
             $response = $client->request($this->getMethod($this->method), $this->apiUrl, $this->getOptions());
-
-            $array = $this->parseToArray((string) $response->getBody());
-
-            return $array;
+            return $this->parseToArray((string) $response->getBody());
         } catch (ClientException $e) {
             $response = $e->getResponse()->getBody()->getContents();
+        }
+    }
+
+    private function getAccessToken()
+    {
+        $client = new Client([
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+            'auth' => [config('ssgwsg.public_key'), config('ssgwsg.secret_key')],
+            'json' => ['grant_type' => 'client_credentials'],
+        ]);
+        try {
+            $response = $client->request('POST', self::OPEN_BASE_URL."/dp-oauth/oauth/token");
+            return $this->parseToArray((string) $response->getBody())['access_token'];
+        } catch (ClientException $e) {
+            return '';
         }
     }
 
@@ -161,5 +184,10 @@ class Ssgwsg
         $this->apiUrl = $this->setApiUrl($url, $arguments);
         $this->method = $this->setMethod($name);
         $this->type = 'certificate';
+    }
+
+    private function isLive()
+    {
+        return config('ssgwsg.livemode');
     }
 }

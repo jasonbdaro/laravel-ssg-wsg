@@ -3,3 +3,8 @@ composer.lock
 vendor
 coverage
 .env*
+certs
+
+# PHPUnit
+.phpunit.cache
+.phpunit.result.cache

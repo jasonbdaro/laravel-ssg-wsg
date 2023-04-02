@@ -8,6 +8,7 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
+         cacheResult ="false"
          stopOnFailure="false">
     <testsuites>
         <testsuite name="Test Suite">
@@ -22,7 +23,10 @@
 
     <php>
         <env name="APP_ENV" value="testing" />
+        <env name="SSGWSG_LIVEMODE" value="false" />
         <env name="SSGWSG_PUBLIC_KEY" value="06c9cea42280461fa6cd83ad0ba54bac" />
         <env name="SSGWSG_SECRET_KEY" value="YmI1MWM0MzYtMTg3ZS00MGQxLWEwM2ItYTRkYTRmYTg0ZGFj" />
+        <env name="SSGWSG_CERT_PUBLIC" value="./certs/cert.pem" />
+        <env name="SSGWSG_CERT_SECRET" value="./certs/key.pem" />
     </php>
 </phpunit>

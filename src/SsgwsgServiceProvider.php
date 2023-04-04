@@ -23,5 +23,9 @@ class SsgwsgServiceProvider extends ServiceProvider
         $this->app->singleton('ssgwsg', function () {
             return new Ssgwsg;
         });
+
+        $this->app->singleton('ssgwsg.api', function () {
+            return new SsgwsgApi;
+        });
     }
 }

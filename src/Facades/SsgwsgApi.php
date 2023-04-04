@@ -13,6 +13,6 @@ class Ssgwsg extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'ssgwsg';
+        return 'ssgwsg.api';
     }
 }

@@ -6,7 +6,11 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use Jasonbdaro\Ssgwsg\Exceptions\BadRequestException;
+use Jasonbdaro\Ssgwsg\Exceptions\ForbiddenRequestException;
 use Jasonbdaro\Ssgwsg\Exceptions\UndefinedConstantException;
+use Jasonbdaro\Ssgwsg\Exceptions\NotFoundException;
+use Jasonbdaro\Ssgwsg\Exceptions\ServerErrorException;
 
 class BaseResource
 {
@@ -59,7 +63,15 @@ class BaseResource
             return $this->parseToArray((string) $response->getBody());
         } catch (ClientException $e) {
             $response = $e->getResponse()->getBody()->getContents();
-            return response($response);
+            if (400 === $e->getCode()) {
+                throw new BadRequestException($response, $e->getCode());
+            } else if (403 === $e->getCode()) {
+                throw new ForbiddenRequestException($response, $e->getCode());
+            } else if (404 === $e->getCode()) {
+                throw new NotFoundException($response, $e->getCode());
+            } else if (500 === $e->getCode()) {
+                throw new ServerErrorException($response, $e->getCode());
+            }
         }
     }
 
@@ -97,7 +109,7 @@ class BaseResource
                 ],
             ];
         }
-        if ('create' === $this->method) {
+        if ('post' === $this->method) {
             $this->options = [
                 'headers' => [
                     'Accept' => 'application/json',

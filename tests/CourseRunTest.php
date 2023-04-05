@@ -7,9 +7,9 @@ use Jasonbdaro\Ssgwsg\Facades\Ssgwsg;
 class CourseRunTest extends BaseTestCase
 {
     /** @test */
-    public function it_can_create_course_run()
+    public function course_creation_expects_200_http_status_code()
     {
         $data = Ssgwsg::courseRun()->create([]);
-        $this->assertNotEmpty($data);
+        $this->assertEquals(200, $data['status']);
     }
 }

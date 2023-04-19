@@ -25,19 +25,22 @@ class BaseResource
     protected $data;
     protected $prefix = 'open';
     protected $type;
+    protected $query;
 
     public function __call($name, $arguments)
     {
         $prefix = $this->isLive() ? '' : 'TEST_';
+
+        if (count($arguments)) {
+            $this->data = $arguments[count($arguments) - 1];
+            $this->query = $arguments[count($arguments) - 1];
+            unset($arguments[count($arguments) - 1]);
+        }
+
         if (Str::startsWith($name, $this->prefix)) {
             $this->setOpenAttributes($name, $prefix, $arguments);
         } else {
             $this->setCertificateAttributes($name, $prefix, $arguments);
-        }
-
-        if (count($arguments)) {
-            $this->data = $arguments[count($arguments) - 1];
-            unset($arguments[count($arguments) - 1]);
         }
 
         return $this->request();
@@ -107,6 +110,7 @@ class BaseResource
                     'Accept' => 'application/json',
                     'Content-type' => 'application/json',
                 ],
+                'query' => $this->query,
             ];
         }
         if ('post' === $this->method) {

@@ -26,6 +26,11 @@ class CourseRun extends BaseResource
         return parent::getCourseRunSessions($id, $query);
     }
 
+    public function update(string $id, array $body)
+    {
+        return parent::postDeleteCourseRun($id, $body);
+    }
+
     public function delete(string $id, array $body)
     {
         return parent::postDeleteCourseRun($id, $body);
